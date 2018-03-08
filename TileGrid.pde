@@ -1,54 +1,62 @@
 public class TileGrid {
-  private static final float WATER_LEVEL = .4;
   public float tileSize;
   private float[][] elevations;
-  private float[][] climate;
+  private float[][] temperatures;
+  private float seaLevel;
   
-  public TileGrid(float gridSize, int numTiles, float scale, float climateScale) {
+  public TileGrid(float gridSize, int numTiles, float elevationScale, float climateScale, float seaLevel) {
     this.tileSize = gridSize/numTiles;
-    PVector forestSeed = new PVector(random(numTiles, numTiles * 2), random(numTiles, numTiles * 2));
+    this.seaLevel = seaLevel;
     
-    ArrayList elevationStack = new ArrayList<PerlinWave>();
-    elevationStack.add(new PerlinWave(scale, 1, random(1), random(1)));
-    elevationStack.add(new PerlinWave(scale/2, 2, random(1,2), random(1,2)));
-    elevationStack.add(new PerlinWave(scale/4, 4, random(2,4), random(2,4)));
+    ArrayList elevationStack = waveStack(elevationScale, 4);
+    ArrayList climateStack = waveStack(climateScale, 2);
     
     this.elevations = new float[numTiles][numTiles];
-    this.climate = new float[numTiles][numTiles];
+    this.temperatures = new float[numTiles][numTiles];
+    
+    float multiplier = 0.75;
     
     for (int i=0; i < numTiles; i++) {
       for (int j=0; j < numTiles; j++) {
         this.elevations[i][j] = stackedValueAt(i, j, elevationStack);
-        this.climate[i][j] = noise((forestSeed.x + i) * climateScale, (forestSeed.y + j) * climateScale);
+        this.temperatures[i][j] = norm(
+            stackedValueAt(i, j, climateStack) - multiplier * (this.elevations[i][j] - 0.5),
+            multiplier * -0.5, 
+            1 + multiplier * 0.5
+        );
       }
     }
   }
   
-  public TileGrid(float gridSize, int numTiles) {
-    this(gridSize, numTiles, 1, 0.5);
-  }
-  
-  public TileGrid(float gridSize, int numTiles, float scale) {
-    this(gridSize, numTiles, scale, 0.5);
-  }
-  
-  public void render() {
+  public void render(boolean climate) {
     noStroke();
     for (int i=0; i < this.elevations.length; i++) {
       for (int j=0; j < this.elevations[i].length; j++) {
-        renderElevation(i, j);
+        if (this.elevations[i][j] < seaLevel) {
+          renderWater(i, j);
+        } else {
+          if (climate)
+            renderTemperature(i, j);
+          else
+            renderElevation(i, j);
+        }
       }
     }
   }
   
   private void renderElevation(int i, int j) {
-    if (this.elevations[i][j] < WATER_LEVEL) {
-      fill(WATER);
-      rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
-    } else {
-      fill(step(15, this.elevations[i][j]));
-      rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
-    }
+    fill(step(15, this.elevations[i][j]));
+    rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+  }
+  
+  private void renderTemperature(int i, int j) {
+    fill(step(15, this.temperatures[i][j], TEMPERATURE_COLORS));
+    rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
+  }
+  
+  private void renderWater(int i, int j) {
+    fill(WATER);
+    rect(i * this.tileSize, j * this.tileSize, this.tileSize, this.tileSize);
   }
 
 }
