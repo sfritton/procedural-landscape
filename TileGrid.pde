@@ -56,6 +56,8 @@ public class TileGrid {
         }
       }
     }
+    
+    getLegendByType(mapType).render();
   }
   
   private void renderElevation(int i, int j) {
