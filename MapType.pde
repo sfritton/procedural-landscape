@@ -1,0 +1,6 @@
+public enum MapType {
+  ELEVATION,
+  TEMPERATURE,
+  PRECIPITATION,
+  BIOME
+}

@@ -8,6 +8,15 @@ public final color[] ELEVATION_COLORS = {
 };
 
 public final color[] TEMPERATURE_COLORS = { color(0, 0, 255), color(255), color(255, 0, 0) };
+public final color[] PRECIPITATION_COLORS = {
+  color(150, 0, 0),
+  color(150, 0, 0),
+  color(250, 150, 0),
+  color(255),
+  color(0, 150, 0),
+  color(0, 255, 255),
+  color(0, 255, 255)
+};
 
 public color gradient(float percent, color color1, color color2) {
   float diffRed = red(color2) - red(color1);
@@ -69,32 +78,4 @@ public color step(int steps, float percent, color[] colors) {
 
 public color step(int steps, float percent) {
   return step(steps, percent, ELEVATION_COLORS);
-}
-
-public ArrayList<PerlinWave> waveStack(float scale, int numWaves, PVector seed) {
-  ArrayList waves = new ArrayList<PerlinWave>();
-  
-  for (int i=0; i < numWaves; i++) {
-    float layer = pow(2, i);
-    waves.add(new PerlinWave(scale/layer, layer, seed.x + random(layer - 1, layer), seed.y + random(layer - 1, layer)));
-  }
-  
-  return waves;
-}
-
-public ArrayList<PerlinWave> waveStack(float scale, int numWaves) {
-  return waveStack(scale, numWaves, new PVector());
-}
-
-public float stackedValueAt(float i, float j, ArrayList<PerlinWave> waves) {
-  float result = 0;
-  float max = 0;
-  
-  for (int k=0; k < waves.size(); k++) {
-    PerlinWave wave = waves.get(k);
-    result += wave.valueAt(i, j);
-    max += wave.amplitude;
-  }
-  
-  return max > 0 ? norm(result, 0, max) : 0;
 }

@@ -21,3 +21,31 @@ public class PerlinWave {
     return this.amplitude * noise((this.seed.x + i) * frequency, (this.seed.y + j) * frequency);
   }
 }
+
+public ArrayList<PerlinWave> waveStack(float scale, int numWaves, PVector seed) {
+  ArrayList waves = new ArrayList<PerlinWave>();
+  
+  for (int i=0; i < numWaves; i++) {
+    float layer = pow(2, i);
+    waves.add(new PerlinWave(scale/layer, layer, seed.x + random(layer - 1, layer), seed.y + random(layer - 1, layer)));
+  }
+  
+  return waves;
+}
+
+public ArrayList<PerlinWave> waveStack(float scale, int numWaves) {
+  return waveStack(scale, numWaves, new PVector());
+}
+
+public float stackedValueAt(float i, float j, ArrayList<PerlinWave> waves) {
+  float result = 0;
+  float max = 0;
+  
+  for (int k=0; k < waves.size(); k++) {
+    PerlinWave wave = waves.get(k);
+    result += wave.valueAt(i, j);
+    max += wave.amplitude;
+  }
+  
+  return max > 0 ? norm(result, 0, max) : 0;
+}
